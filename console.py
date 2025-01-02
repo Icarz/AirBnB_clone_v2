@@ -43,6 +43,46 @@ class HBNBCommand(cmd.Cmd):
         return True
 
     def do_create(self, line):
+        """Usage: create <class name> <key=value> ...
+    Create a new instance of a class, set its attributes, save it, and print its ID.
+    """
+    try:
+        if not line:
+            raise SyntaxError("** class name missing **")
+        
+        args = line.split(" ")
+        class_name = args[0]
+        if class_name not in self.__classes:
+            raise NameError("** class doesn't exist **")
+        
+        kwargs = {}
+        for param in args[1:]:
+            if "=" not in param:
+                continue
+            key, value = param.split("=", 1)
+            
+            # Handle strings, escaping quotes and replacing underscores with spaces
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1].replace("_", " ").replace('\\"', '"')
+            else:
+                # Try to evaluate as int, float, or leave as string
+                try:
+                    value = eval(value)
+                except (SyntaxError, NameError):
+                    continue
+            
+            kwargs[key] = value
+        
+        # Create instance and set attributes
+        obj = eval(class_name)(**kwargs)
+        obj.save()
+        print(obj.id)
+
+    except SyntaxError as e:
+        print(e)
+    except NameError as e:
+        print(e)
+
         """Usage: create <class> <key 1>=<value 2> <key 2>=<value 2> ...
         Create a new class instance with given keys/values and print its id.
         """
